@@ -1,9 +1,11 @@
 var mongoose = require("mongoose")
 require("dotenv").config()
 
-mongoose.connect(process.env.MONGO_URI,
-  { useNewUrlParser: true, useUnifiedTopology: true, useFindAndModify: false,
-    useCreateIndex: true })
+mongoose.connect(process.env.MONGO_URI, {
+  useNewUrlParser: true,
+  useUnifiedTopology: true,
+  useFindAndModify: false
+}).catch((err) => { return console.error(err) })
 
 const { Schema } = mongoose
 
@@ -97,13 +99,21 @@ const removeById = (personId, done) => {
 const removeManyPeople = (done) => {
   const nameToRemove = "Mary"
 
-  done(null /*, data*/)
+  Person.deleteMany(({ name: nameToRemove }, (err, data) => {
+    if (err) return console.error(err)
+
+    done(null, data)
+  }))
 }
 
 const queryChain = (done) => {
   const foodToSearch = "burrito"
 
-  done(null /*, data*/)
+  Person.find({ favoriteFoods: foodToSearch })
+    .sort({ name: "asc" })
+    .limit(2)
+    .select("-age")
+    .exec((err, data) => done(err, data))
 }
 
 /** **Well Done !!**
